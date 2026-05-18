@@ -30,8 +30,8 @@ auditor-ready evidence pack — without leaving your CI.
 That single step:
 
 - Installs the cosign-verified `compliancekit` binary on the runner.
-- Scans the providers you enable, against **298 checks** mapped to
-  **548 controls** across **7 frameworks**.
+- Scans the providers you enable, against **574 checks** mapped to
+  **668 controls** across **9 frameworks**.
 - Writes SARIF (Code Scanning), Markdown (PR comments), and JSON
   (downstream evidence pack) to `./out/`.
 - Fails the job when a finding is at or above the `fail-on` severity.
@@ -64,33 +64,35 @@ binary released with Sigstore cosign signatures and SBOMs.
 
 | Provider     | Authentication                                       | Checks |
 | ------------ | ---------------------------------------------------- | -----: |
-| DigitalOcean | `DO_API_TOKEN` (read scope is enough)                |     74 |
+| DigitalOcean | `DO_API_TOKEN` (read scope is enough)                |    144 |
 | AWS          | Standard SDK chain — env, profile, IMDSv2, or OIDC   |     30 |
 | GCP          | Application Default Credentials or WIF               |     25 |
 | Hetzner      | `HCLOUD_TOKEN` (project-scoped)                      |     15 |
-| Kubernetes   | `~/.kube/config` chain — works for EKS, GKE, DOKS    |    139 |
-| Linux        | SSH key (bastion supported)                          |     15 |
+| Kubernetes   | `~/.kube/config` chain — works for EKS, GKE, DOKS    |    241 |
+| Linux        | SSH key (bastion supported)                          |    119 |
 
-**Total: 298 checks**, every one framework-mapped and remediation-documented.
+**Total: 574 checks**, every one framework-mapped and remediation-documented.
 See the live [check catalog](https://github.com/darpanzope/compliancekit/blob/main/docs/checks.md)
 for IDs, severities, and per-control mapping.
 
 ### Frameworks
 
-| Framework                | Version                       | Coverage                          | Category     |
-| ------------------------ | ----------------------------- | --------------------------------: | ------------ |
-| SOC 2 TSC                | 2017 (2022 PoF)               | 60 controls                       | compliance   |
-| ISO/IEC 27001 Annex A    | 2022                          | 93 controls                       | compliance   |
-| CIS Controls v8          | v8                            | 153 safeguards (IG1 / IG2 / IG3)  | compliance   |
-| NIST SP 800-53           | r5                            | 131 controls (cloud + Linux)      | compliance   |
-| HIPAA Security Rule      | 45 CFR §§164.308 / 310 / 312  | 50 implementation specs          | compliance   |
-| PCI DSS                  | v4.0                          | 61 sub-requirements              | compliance   |
-| MITRE ATT&CK Enterprise  | v15 (2024)                    | 12 tactics + 50 techniques       | threat model |
+| Framework                                  | Version                       | Coverage                                                                                       | Category     |
+| ------------------------------------------ | ----------------------------- | ---------------------------------------------------------------------------------------------: | ------------ |
+| SOC 2 TSC                                  | 2017 (2022 PoF)               | 60 (full CC1-CC9 + A + C + PI + P)                                                             | compliance   |
+| ISO/IEC 27001 Annex A                      | 2022                          | 93 (org, people, physical, technological)                                                      | compliance   |
+| CIS Controls v8                            | v8                            | 153 safeguards (IG1 / IG2 / IG3)                                                               | compliance   |
+| CIS Linux Server Benchmark                 | v8                            | 90 sections × Level 1 / Level 2 (initial-setup, services, network, logging-auditing, access, sysmaint) | compliance   |
+| NSA / CISA Kubernetes Hardening Guide      | v1.2 (Aug 2022)               | 30 controls × 5 chapters (pod-security, network, auth, logging, upgrading)                     | compliance   |
+| NIST SP 800-53                             | r5                            | 131 controls (cloud + Linux subset across 14 families)                                         | compliance   |
+| HIPAA Security Rule                        | 45 CFR §§164.308 / 310 / 312  | 50 implementation specs (required / addressable)                                               | compliance   |
+| PCI DSS                                    | v4.0                          | 61 sub-requirements                                                                            | compliance   |
+| MITRE ATT&CK Enterprise                    | v15 (2024)                    | 12 tactics + 50 techniques (cloud + Linux subset)                                              | threat model |
 
-**548 controls** total. Every check claims only the controls it actually
-reaches — no aspirational mappings. Operators scope individual controls out
-via [`tailoring:`](#frameworks-and-tailoring) with a required written
-justification that flows through to the audit trail.
+**668 controls** total across **9 frameworks**. Every check claims only the
+controls it actually reaches — no aspirational mappings. Operators scope
+individual controls out via [`tailoring:`](#frameworks-and-tailoring) with a
+required written justification that flows through to the audit trail.
 
 ---
 
@@ -230,7 +232,7 @@ out/
 |   MED    | k8s/Deployment/checkout/api       | pod-runs-as-root               | CIS-K8s 5.2.6; NIST AC-6     |
 | …        | …                                 | …                              | …                            |
 
-_Generated by compliancekit v0.12.0 · framework filter: soc2,iso27001,cis-v8_
+_Generated by compliancekit v1.0.0 · framework filter: soc2,iso27001,cis-v8_
 ```
 
 ### Sample `findings.sarif` (truncated)
