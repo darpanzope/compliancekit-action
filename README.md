@@ -160,13 +160,16 @@ evidence pack uploaded as an artifact:
 | `providers`        | (all enabled in config)  | Comma-separated provider list — `digitalocean,aws,gcp,hetzner,kubernetes,linux`. Empty = obey the config file.    |
 | `config-file`      | —                        | Path to a `compliancekit.yaml` relative to `$GITHUB_WORKSPACE`. Optional; env vars + defaults work without one.   |
 | `inventory`        | —                        | Path to a Linux SSH inventory YAML. Consulted only when the `linux` provider runs.                                |
-| `frameworks`       | (all 7)                  | Comma-separated framework filter — `soc2,iso27001,cis-v8,nist-800-53-r5,hipaa,pci-dss-v4,mitre-attack`.           |
-| `output`           | `sarif,markdown,json`    | Comma-separated formats. Available: `json`, `markdown`, `sarif`, `ocsf`, `html`.                                  |
+| `frameworks`       | (all 9)                  | Comma-separated framework filter — `soc2,iso27001,cis-v8,cis-linux-server,nsa-cisa-k8s,nist-800-53-r5,hipaa,pci-dss-v4,mitre-attack`. |
+| `output`           | `sarif,markdown,json`    | Comma-separated formats. Available: `json`, `markdown`, `sarif`, `ocsf`, `html`. HTML reports embed per-format remediation snippets inline (v1.1+). |
 | `out-dir`          | `./out`                  | Directory the scan writes into. Relative paths resolve under `$GITHUB_WORKSPACE`.                                 |
 | `fail-on`          | `high`                   | Severity threshold for non-zero exit: `critical`, `high`, `medium`, `low`, `info`, or `never` to disable.         |
 | `evidence`         | `false`                  | Produce an audit-ready evidence pack at `<out-dir>/evidence/` alongside the reports.                              |
 | `evidence-period`  | (current calendar quarter) | Audit period label embedded in `evidence/`. Free-form (`2026-Q2`, `2026-H1`, etc.).                             |
 | `upload-sarif`     | `true`                   | Auto-upload SARIF to GitHub Code Scanning. Requires `security-events: write` on the job.                          |
+| `upload-evidence-pack` | `false`              | **v1.1+.** When `true` (and `evidence: true` produced a pack), uploads `evidence/` as a workflow artifact via `actions/upload-artifact@v4`. Off-by-default to keep small repos from silently retaining large packs. |
+| `evidence-artifact-name` | `compliancekit-evidence-pack` | **v1.1+.** Name of the workflow artifact written when `upload-evidence-pack: true`. |
+| `evidence-artifact-retention-days` | `0`            | **v1.1+.** Retention window (days) for the uploaded artifact. `0` = org/repo default. Max per GitHub: 90 (public repos), 400 (private/internal). |
 
 ## Outputs
 
@@ -384,6 +387,11 @@ jobs:
 
 `findings.markdown` is filtered to actionable findings — pass and skip rows
 are dropped so the PR comment stays readable.
+
+> **v1.1 behavior change.** Multi-provider input (`providers: a,b,c`) now
+> actually loops every provider. Pre-v1.1 silently scanned only the first
+> entry. Workflows pinning `@v1` pick up the fix on next run — re-check
+> findings counts if you relied on the old behavior.
 </details>
 
 <details>
